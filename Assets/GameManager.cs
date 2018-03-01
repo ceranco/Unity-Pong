@@ -31,29 +31,11 @@ public class GameManager : MonoBehaviour
 
     #endregion
 
+    #region Private Methods
+
     /// <summary>
-    /// Function that should be called by the ball.
+    /// On each update, do all the actions in the queue.
     /// </summary>
-    /// <param name="wallPosition">The position of the wall</param>
-    public void PointScored(WallPosition wallPosition)
-    {
-        switch (wallPosition)
-        {
-            case WallPosition.RightWall:
-                scorePlayer01++;
-                player01ScoreText.text = $"Score: {scorePlayer01}";
-                break;
-            case WallPosition.LeftWall:
-                scorePlayer02++;
-                player02ScoreText.text = $"Score: {scorePlayer02}";
-                break;
-            default:
-                return;
-        }
-
-        Task.Run(() => CountdownAndStart());
-    }
-
     private void Update()
     {
         System.Action action;
@@ -63,28 +45,11 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void OnGameButtonClick()
-    {
-        if (!playing)
-        {
-            gameButton.GetComponentInChildren<Text>().text = "Stop";
-            Task.Run(() => CountdownAndStart());
-            playing = true;
-        }
-        else
-        {
-            ballControl.gameObject.SetActive(false);
-            scorePlayer01 = 0;
-            player01ScoreText.text = $"Score: {scorePlayer01}";
-            scorePlayer02 = 0;
-            player02ScoreText.text = $"Score: {scorePlayer01}";
-            gameButton.GetComponentInChildren<Text>().text = "Start";
-            playing = false;
-        }
-
-    }
-
-    private async Task CountdownAndStart(int seconds = 3)
+    /// <summary>
+    /// Starts a countdown timer in another thread.
+    /// </summary>
+    /// <param name="seconds">The amount to countdown</param>
+    private async Task CountdownAndStart(ConcurrentQueue<System.Action> actionQueue, int seconds = 3)
     {
         int i = seconds;
         actionQueue.Enqueue(() =>
@@ -106,5 +71,61 @@ public class GameManager : MonoBehaviour
             ballControl?.RestartBallAndGo();
         });
     }
+
+    #endregion
+
+    #region Public Methods
+
+    /// <summary>
+    /// Function that should be called by the ball.
+    /// </summary>
+    /// <param name="wallPosition">The position of the wall</param>
+    public void PointScored(WallPosition wallPosition)
+    {
+        switch (wallPosition)
+        {
+            case WallPosition.RightWall:
+                scorePlayer01++;
+                player01ScoreText.text = $"Score: {scorePlayer01}";
+                break;
+            case WallPosition.LeftWall:
+                scorePlayer02++;
+                player02ScoreText.text = $"Score: {scorePlayer02}";
+                break;
+            default:
+                return;
+        }
+
+        Task.Run(() => CountdownAndStart(actionQueue));
+    }
+
+    public void OnGameButtonClick()
+    {
+        if (!playing)
+        {
+            // if we are not playing, start the countdown and change the button text to 'Stop'
+            gameButton.GetComponentInChildren<Text>().text = "Stop";
+            Task.Run(() => CountdownAndStart(actionQueue));
+            playing = true;
+        }
+        else
+        {
+            // if we are playing, change the queue so that any ongoing tasks will not fill it, and make sure that the message box is hidden
+            actionQueue = new ConcurrentQueue<System.Action>();
+            messageBox.gameObject.SetActive(false);
+
+            // hide the ball and reset the score counter
+            ballControl.gameObject.SetActive(false);
+            scorePlayer01 = 0;
+            player01ScoreText.text = $"Score: {scorePlayer01}";
+            scorePlayer02 = 0;
+            player02ScoreText.text = $"Score: {scorePlayer01}";
+            gameButton.GetComponentInChildren<Text>().text = "Start";
+            playing = false;
+        }
+
+    }
+
+    #endregion
 }
 
