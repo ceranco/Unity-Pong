@@ -123,6 +123,7 @@ GameObject:
   - component: {fileID: 84007940}
   - component: {fileID: 84007942}
   - component: {fileID: 84007941}
+  - component: {fileID: 84007943}
   m_Layer: 5
   m_Name: MessageBox
   m_TagString: Untagged
@@ -146,7 +147,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 100}
-  m_SizeDelta: {x: 500, y: 90}
+  m_SizeDelta: {x: 600, y: 90}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &84007941
 MonoBehaviour:
@@ -187,6 +188,17 @@ CanvasRenderer:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 84007939}
+--- !u!114 &84007943
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 84007939}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 06965580718ba674fa13f81664fa3d5a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &164317472
 GameObject:
   m_ObjectHideFlags: 0
@@ -773,7 +785,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   player01ScoreText: {fileID: 1690732037}
   player02ScoreText: {fileID: 371823894}
-  messageBox: {fileID: 84007941}
+  winScore: 5
+  messageBox: {fileID: 84007943}
   gameButton: {fileID: 1087080819}
   ballControl: {fileID: 164317475}
 --- !u!1 &707754789

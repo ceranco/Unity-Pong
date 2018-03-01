@@ -306,6 +306,7 @@
     <Compile Include="Assets\BallControl.cs" />
     <Compile Include="Assets\GameManager.cs" />
     <Compile Include="Assets\GlobalTypes.cs" />
+    <Compile Include="Assets\MessageBox.cs" />
     <Compile Include="Assets\PlayerControls.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

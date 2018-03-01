@@ -70,5 +70,14 @@ public class BallControl : MonoBehaviour
         GoBall();
     }
 
+    /// <summary>
+    /// Sets the ball to active or unactive.
+    /// </summary>
+    /// <param name="value">Activates or deactivates the object.</param>
+    public void SetActive(bool value)
+    {
+        gameObject.SetActive(value);
+    }
+
     #endregion
 }
