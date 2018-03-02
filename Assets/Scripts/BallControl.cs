@@ -4,6 +4,7 @@ public class BallControl : MonoBehaviour
 {
     private Rigidbody2D rb2d = null;
     private Vector2 velocity;
+    [SerializeField] float smallestSpeedYAxis;
 
     [SerializeField] public PointEvent OnPoint;
 
@@ -33,6 +34,12 @@ public class BallControl : MonoBehaviour
         {
             velocity.x = rb2d.velocity.x;
             velocity.y = (rb2d.velocity.y / 2.0f) + (collision.collider.attachedRigidbody.velocity.y / 3.0f);
+
+            if (Mathf.Abs(velocity.y) < smallestSpeedYAxis)
+            {
+                velocity.y = velocity.y > 0 ? smallestSpeedYAxis : -smallestSpeedYAxis;
+            }
+
             rb2d.velocity = velocity;
         }
 
