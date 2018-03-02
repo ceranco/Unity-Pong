@@ -50,7 +50,7 @@ public class CountdownTimer : MonoBehaviour
         // getting the text componet
         timerText = GetComponent<Text>();
        
-        // starting the timer is not active
+        // starting the timer as not active
         IsActive = false;
     }
 
@@ -69,6 +69,7 @@ public class CountdownTimer : MonoBehaviour
         }
         // raising the CountdownFinshed event
         OnCountdownFinished(new EventArgs());
+        OnCountdownFinishedOnce(new EventArgs());
         IsActive = false;
     }
 
@@ -90,12 +91,16 @@ public class CountdownTimer : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Stops the current countdown if in progress. Also clears the <see cref="CountdownFinishedOnce"/> handlers.
+    /// </summary>
     public void StopCountdown()
     {
         if (IsActive)
         {
             StopCoroutine(currentCountdown);
         }
+        CountdownFinishedOnce = null;
         IsActive = false;
     }
 
@@ -103,12 +108,25 @@ public class CountdownTimer : MonoBehaviour
 
     #region Event Members
 
+    /// <summary>
+    /// Event that fires when the countdown is finished.
+    /// </summary>
     public event EventHandler CountdownFinished;
+
+    /// <summary>
+    /// Event that fires when the countdown is finished, then removes all of the subscribed handler.
+    /// </summary>
+    public event EventHandler CountdownFinishedOnce;
 
     protected virtual void OnCountdownFinished(EventArgs e)
     {
-        EventHandler handler = CountdownFinished;
-        handler?.Invoke(this, e);
+        CountdownFinished?.Invoke(this, e);
+    }
+
+    protected virtual void OnCountdownFinishedOnce(EventArgs e)
+    {
+        CountdownFinishedOnce?.Invoke(this, e);
+        CountdownFinishedOnce = null;
     }
 
     #endregion

@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,11 +18,10 @@ public class GameManager : MonoBehaviour
     [SerializeField] uint winScore = 0;
 
     /* The Message box */
-    //[SerializeField]  Text messageBox = null;
     [SerializeField] MessageBox messageBox = null;
 
-    /* A threadsafe queue of action to happen in the Update phase */
-    ConcurrentQueue<System.Action> actionQueue = new ConcurrentQueue<System.Action>();
+    /* The Countdown Timer */
+    [SerializeField] CountdownTimer countdownTimer = null;
 
     /* The buttons */
     [SerializeField] Button gameButton = null;
@@ -37,64 +37,37 @@ public class GameManager : MonoBehaviour
     #region Private Methods
 
     /// <summary>
-    /// On each update, do all the actions in the queue.
+    /// Starts the current turn.
     /// </summary>
-    private void Update()
+    private void StartTurn()
     {
-        System.Action action;
-        while (actionQueue.TryDequeue(out action))
-        {
-            action();
-        }
+        UnityEngine.Debug.Log("<color=green>Starting turn</color>");
+        ballControl.SetActive(true);
+        ballControl.RestartBallAndGo();
     }
 
     /// <summary>
-    /// Starts a countdown timer and starts the game. Should be called from different thread.
+    /// Starts the game.
     /// </summary>
-    /// <param name="seconds">The amount to countdown</param>
-    private void CountdownAndStart(ConcurrentQueue<System.Action> actionQueue, int seconds = 3)
+    private void StartGame()
     {
-        int i = seconds;
-        actionQueue.Enqueue(() =>
-        {
-            ballControl.SetActive(false);
-            messageBox.Show();
-        });
-        while (i > 0)
-        {
-            actionQueue.Enqueue(() => { messageBox.SetText(i.ToString(), 75); });
-            Thread.Sleep(1000);
-            i--;
-        }
-        actionQueue.Enqueue(() =>
-        {
-            messageBox.Hide();
-            ballControl.SetActive(true);
-            ballControl.RestartBallAndGo();
-        });
+        gameButton.GetComponentInChildren<Text>().text = "Stop";
+
+        // start the turn at the end of the 3 second countdown of the countdown timer
+        countdownTimer.CountdownFinishedOnce += (object sender, EventArgs e) => StartTurn();
+        countdownTimer.StartCountdown(3, 1);
+        playing = true;
     }
 
     /// <summary>
-    /// Shows a message for a fixed amount of time. Should be called from another thread.
+    /// Ends the game.
     /// </summary>
-    /// <param name="actionQueue"></param>
-    /// <param name="message"></param>
-    /// <param name="fontSize"></param>
-    /// <param name="millis"></param>
-    private void TimedMessage(ConcurrentQueue<System.Action> actionQueue, string message, int fontSize, int millis)
+    private void EndGame()
     {
-        actionQueue.Enqueue(() =>
-        {
-            messageBox.Show();
-            messageBox.SetText(message, fontSize);
-        });
-        Thread.Sleep(millis);
-        actionQueue.Enqueue(() => { messageBox.Hide(); });
-    }
+        UnityEngine.Debug.Log("<color=#800000ff>Stopping playing</color>");
 
-    private void StopPlaying()
-    {
-        messageBox.Hide();
+        // stop countdown if in progress
+        countdownTimer.StopCountdown();
 
         // hide the ball and reset the score counter
         ballControl.SetActive(false);
@@ -137,23 +110,20 @@ public class GameManager : MonoBehaviour
 
         if (scorePlayer01 == winScore || scorePlayer02 == winScore)
         {
-            int winningPlayer = scorePlayer01 == winScore ? 1 : 2;
-
-            // change the queue so that any ongoing tasks will not fill it, and make sure that the message box is hidden
-            actionQueue = new ConcurrentQueue<System.Action>();
-
-            StopPlaying();
-            Task.Run(() => TimedMessage(actionQueue, $"Player {winningPlayer} Wins!", 60, 1000));
+            // if the game is won, then stop it and show an appropiate message
+            EndGame();
+            messageBox.TimedMessage($"Player {scoringPlayer} Wins!", 60, 3);
             playing = false;
         }
 
         else
         {
-            var queue = actionQueue;
-            Task.Run(() =>
+            // if the game is to be continued, show appropiate message, start the countdown timer and start anothe turn
+            messageBox.TimedMessage($"Player {scoringPlayer} Scored!", 60, 1, () =>
             {
-                TimedMessage(queue, $"Player {scoringPlayer} Scored!", 60, 1000);
-                CountdownAndStart(queue);
+                // start the turn at the end of the 3 second countdown of the countdown timer
+                countdownTimer.CountdownFinishedOnce += (object sender, EventArgs e) => StartTurn();
+                countdownTimer.StartCountdown(3, 1);
             });
         }
 
@@ -161,23 +131,18 @@ public class GameManager : MonoBehaviour
 
     public void OnGameButtonClick()
     {
-        // if we are playing, change the queue so that any ongoing tasks will not fill it, and make sure that the message box is hidden
-        actionQueue = new ConcurrentQueue<System.Action>();
-
         if (!playing)
         {
-            // if we are not playing, start the countdown and change the button text to 'Stop'
-            gameButton.GetComponentInChildren<Text>().text = "Stop";
-            Task.Run(() => CountdownAndStart(actionQueue));
-            playing = true;
+            StartGame();
         }
         else
         {
-            StopPlaying();
+            EndGame();
         }
 
     }
 
     #endregion
+
 }
 
