@@ -72,6 +72,14 @@ public class MessageBox : MonoBehaviour
         currentTimedMessage = StartCoroutine(TimedMessageRoutine(message, fontSize, time, action));
     }
 
+    public void StopMessage()
+    {
+        if (IsActive && currentTimedMessage != null)
+        {
+            StopCoroutine(currentTimedMessage);
+            IsActive = false;
+        }
+    }
 
     #endregion
 }

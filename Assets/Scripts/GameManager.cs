@@ -29,12 +29,20 @@ public class GameManager : MonoBehaviour
     /* The ball */
     [SerializeField] BallControl ballControl = null;
 
+    /* The music player */
+    [SerializeField] MusicPlayer musicPlayer = null;
+
     /* Playing flag */
     bool playing = false;
 
     #endregion
 
     #region Private Methods
+
+    private void Start()
+    {
+        musicPlayer.StartPlaying();
+    }
 
     /// <summary>
     /// Starts the current turn.
@@ -68,6 +76,9 @@ public class GameManager : MonoBehaviour
 
         // stop countdown if in progress
         countdownTimer.StopCountdown();
+
+        // stop message box if in progress
+        messageBox.StopMessage();
 
         // hide the ball and reset the score counter
         ballControl.SetActive(false);
@@ -118,7 +129,7 @@ public class GameManager : MonoBehaviour
 
         else
         {
-            // if the game is to be continued, show appropiate message, start the countdown timer and start anothe turn
+            // if the game is to be continued, show appropiate message, start the countdown timer and start another turn
             messageBox.TimedMessage($"Player {scoringPlayer} Scored!", 60, 1, () =>
             {
                 // start the turn at the end of the 3 second countdown of the countdown timer
