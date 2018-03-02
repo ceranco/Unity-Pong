@@ -10,9 +10,17 @@ public class CountdownTimer : MonoBehaviour
     /* The text of the timer */
     Text timerText;
 
+    /* The sound the timer makes on a tick */
+    [SerializeField] AudioClip tickSound = null;
+
+    /* The sound the timer makes on end of countdown */
+    [SerializeField] AudioClip endOfCountdownSound = null;
+
+    /* The audio source of the timer */
+    AudioSource audioSource;
+
     /* The current countdown coroutine */
     Coroutine currentCountdown;
-
 
     #endregion
 
@@ -49,7 +57,10 @@ public class CountdownTimer : MonoBehaviour
     {
         // getting the text componet
         timerText = GetComponent<Text>();
-       
+
+        // getting the audio source component
+        audioSource = GetComponent<AudioSource>();
+
         // starting the timer as not active
         IsActive = false;
     }
@@ -65,11 +76,17 @@ public class CountdownTimer : MonoBehaviour
         for (int i = (int)startNumber; i > 0; i--)
         {
             timerText.text = i.ToString();
+            audioSource.PlayOneShot(tickSound);
             yield return new WaitForSeconds(delay);
         }
         // raising the CountdownFinshed event
+        audioSource.PlayOneShot(endOfCountdownSound);
         OnCountdownFinished(new EventArgs());
         OnCountdownFinishedOnce(new EventArgs());
+        
+        // hiding the timer until the end of countdown sound is finished playing, then disabling the gameobject
+        timerText.text = "";
+        yield return new WaitUntil(() => !audioSource.isPlaying);
         IsActive = false;
     }
 

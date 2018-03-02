@@ -4,7 +4,7 @@ public class BallControl : MonoBehaviour
 {
     private Rigidbody2D rb2d = null;
     private Vector2 velocity;
-    [SerializeField] float smallestSpeedYAxis;
+    [SerializeField] float smallestSpeedYAxis = 0;
 
     [SerializeField] public PointEvent OnPoint;
 
