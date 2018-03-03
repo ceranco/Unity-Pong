@@ -2,7 +2,7 @@
 
 public class BallControl : MonoBehaviour
 {
-    private Rigidbody2D rb2d = null;
+    private Rigidbody2D rb2d;
     private Vector2 velocity;
     [SerializeField] float smallestSpeedYAxis = 0;
 
@@ -10,15 +10,17 @@ public class BallControl : MonoBehaviour
 
     #region Private Methods
 
+    private void Awake()
+    {
+        rb2d = GetComponent<Rigidbody2D>();
+        rb2d.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+    }
+
     /// <summary>
     /// Resets the ball position and velocity.
     /// </summary>
     private void ResetBall()
     {
-        if (rb2d == null)
-        {
-            rb2d = GetComponent<Rigidbody2D>();
-        }
         velocity = Vector2.zero;
         rb2d.velocity = velocity;
         transform.position = Vector2.zero;
