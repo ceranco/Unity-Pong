@@ -2,8 +2,9 @@
 
 public class BallControl : MonoBehaviour
 {
-    private Rigidbody2D rb2d;
-    private Vector2 velocity;
+    Rigidbody2D rb2d;
+    Vector2 velocity;
+    AudioSource audioSource;
     [SerializeField] float smallestSpeedYAxis = 0;
 
     [SerializeField] public PointEvent OnPoint;
@@ -14,6 +15,7 @@ public class BallControl : MonoBehaviour
     {
         rb2d = GetComponent<Rigidbody2D>();
         rb2d.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+        audioSource = GetComponent<AudioSource>();
     }
 
     /// <summary>
@@ -34,6 +36,7 @@ public class BallControl : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Player"))
         {
+            audioSource.Play();
             velocity.x = rb2d.velocity.x;
             velocity.y = (rb2d.velocity.y / 2.0f) + (collision.collider.attachedRigidbody.velocity.y / 3.0f);
 
